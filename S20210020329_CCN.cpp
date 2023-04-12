@@ -1,67 +1,60 @@
-#include <iostream>
-#include <climits>
 #include <bits/stdc++.h>
 using namespace std;
 
-
 int fragmentation()
 {
-    int payload, mtu, header = 20;
-    cout << "Enter the payload size (include header):" << endl;
-    cin >> payload;
-    cout << "Enter the mtu size:" << endl;
+    float pl, mtu, header = 20;
+    cout << "Enter the payload size (include header) (in bits):" << endl;
+    cin >> pl;
+    cout << "Enter the mtu size(with header) (in bits):" << endl;
     cin >> mtu;
-    int packets = ceil((payload - header) / (mtu - header));
+    int packets = ceil((pl - header) / (mtu - header));
     return packets;
 }
-int minimumDist(int dist[], bool Tset[], int n)
-{
-    int min = INT_MAX, index;
-    for (int i = 0; i < n; i++)
-    {
-        if (Tset[i] == false && dist[i] <= min)
-        {
-            min = dist[i];
-            index = i;
-        }
-    }
-    return index;
-}
 
-void printPath(int parent[], int j)
+
+void displayshortestpath(int root[], int j)
 {
-    // Base Case : If j is source
-    if (parent[j] == -1)
+    if (root[j] == -1)
         return;
-    printPath(parent, parent[j]);
+    displayshortestpath(root, root[j]);
     cout << "->" << j;
 }
 
-void Dijkstra(vector<vector<int>> graph, int src, int n, int dest)
+void Dijkstra(vector<vector<int>> cost_matrix, int start, int n, int end)
 {
-    int dist[n];
-    bool Tset[n];
-    int parent[n];
+    int len[n];
+    bool Ps[n];
+    int root[n];
 
     for (int i = 0; i < n; i++)
     {
-        dist[i] = INT_MAX;
-        Tset[i] = false;
-        parent[i] = -1;
+        len[i] = INT_MAX;
+        Ps[i] = false;
+        root[i] = -1;
     }
 
-    dist[src] = 0;
+    len[start] = 0;
 
     for (int i = 0; i < n; i++)
     {
-        int m = minimumDist(dist, Tset, n);
-        Tset[m] = true;
+          int min = INT_MAX, key;
+    for (int i = 0; i < n; i++)
+    {
+        if (Ps[i] == false && len[i] <= min)
+        {
+            min = len[i];
+            key = i;
+        }
+    }
+        int m = key;
+        Ps[m] = true;
         for (int j = 0; j < n; j++)
         {
-            if (!Tset[j] && graph[m][j] && dist[m] != INT_MAX && dist[m] + graph[m][j] < dist[j])
+            if (!Ps[j] && cost_matrix[m][j] && len[m] != INT_MAX && len[m] + cost_matrix[m][j] < len[j])
             {
-                dist[j] = dist[m] + graph[m][j];
-                parent[j] = m; // update parent of j
+                len[j] = len[m] + cost_matrix[m][j];
+                root[j] = m; // update root of j
             }
         }
     }
@@ -69,18 +62,18 @@ void Dijkstra(vector<vector<int>> graph, int src, int n, int dest)
     for (int i = 0; i < n; i++)
     { // Printing
 
-        if (i == dest)
+        if (i == end)
         {
-            if (dist[i] > 1000000)
+            if (len[i] > 1000000)
             {
                 cout << "No path available" << endl;
             }
             else
             {
-                cout << "Vertex\t\tDistance from source\tShortest Path" << endl;
+                cout << "Vertex\t\tdistance from source\tShortest Path" << endl;
                 char str = 65 + i; // Ascii values for pritning A,B,C..
-                cout << str << "\t\t" << dist[i] << "\t\t\t" << src;
-                printPath(parent, i);
+                cout << str << "\t\t" << len[i] << "\t\t\t" << start;
+                displayshortestpath(root, i);
                 cout << endl;
             }
         }
@@ -93,14 +86,14 @@ int main()
 
     cout << "What is number of nodes:" << endl;
     cin >> size;
-    vector<vector<int>> graph(size, vector<int>(size));
+    vector<vector<int>> cost_matrix(size, vector<int>(size));
 
-    cout << "Enter the adjacency matrix for the graph:" << endl;
+    cout << "Enter the adjacency matrix for the cost_matrix:" << endl;
     for (int i = 0; i < size; i++)
     {
         for (int j = 0; j < size; j++)
         {
-            cin >> graph[i][j];
+            cin >> cost_matrix[i][j];
         }
     }
     cout << "Adjacency Matrix:" << endl;
@@ -108,7 +101,7 @@ int main()
     {
         for (int j = 0; j < size; j++)
         {
-            cout << graph[i][j] << "  ";
+            cout << cost_matrix[i][j] << "  ";
         }
         cout << endl;
     }
@@ -125,46 +118,47 @@ int main()
         cout << "\t\t\tFor packet" << str << endl;
         if (flag == 1)
         {
-            int source, dest;
+            int source, end;
             int newsize;
 
             cout << "What is number of nodes:" << endl;
             cin >> newsize;
+            cout<< newsize;
 
-            vector<vector<int>> newgraph(size, vector<int>(size));
-            cout << "Enter the adjacency matrix for the graph:" << endl;
-            for (int i = 0; i < size; i++)
+            vector<vector<int>> newcost_matrix(newsize, vector<int>(newsize));
+            cout << "Enter the adjacency matrix for the cost_matrix:" << endl;
+            for (int i = 0; i < newsize; i++)
             {
-                for (int j = 0; j < size; j++)
+                for (int j = 0; j < newsize; j++)
                 {
-                    cin >> newgraph[i][j];
+                    cin >> newcost_matrix[i][j];
                 }
             }
             cout << "Adjacency Matrix:" << endl;
-            for (int i = 0; i < size; i++)
+            for (int i = 0; i < newsize; i++)
             {
-                for (int j = 0; j < size; j++)
+                for (int j = 0; j < newsize; j++)
                 {
-                    cout << graph[i][j] << "  ";
+                    cout << newcost_matrix[i][j] << "  ";
                 }
                 cout << endl;
             }
             cout << "Enter the source of the packet:" << endl;
             cin >> source;
             cout << "Enter the destination for the packet:" << endl;
-            cin >> dest;
-            Dijkstra(newgraph, source, newsize, dest);
-            graph = newgraph;
+            cin >> end;
+            Dijkstra(newcost_matrix, source, newsize, end);
+            cost_matrix = newcost_matrix;
             size = newsize;
         }
         else
         {
-            int source, dest;
+            int source, end;
             cout << "Enter the source of the packet:" << endl;
             cin >> source;
             cout << "Enter the destination for the packet:" << endl;
-            cin >> dest;
-            Dijkstra(graph, source, size, dest);
+            cin >> end;
+            Dijkstra(cost_matrix, source, size, end);
         }
     }
 
